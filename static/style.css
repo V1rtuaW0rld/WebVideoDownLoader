@@ -1,0 +1,243 @@
+/* === Structure générale === */
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+input[type="text"] {
+    width: 400px;
+    padding: 8px;
+}
+
+button {
+    padding: 8px 16px;
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+/* === Sortie en direct === */
+#output {
+    border: 1px solid #ccc;
+    padding: 10px;
+    height: 400px;
+    overflow-y: auto;
+    background: #f5f5f5;
+    white-space: pre-wrap;
+    font-family: monospace;
+}
+
+/* === Tableau principal === */
+#video-table {
+    width: 100%;
+    margin: 20px 0;
+    border-collapse: collapse;
+    border: 2px solid #333;
+    table-layout: fixed;
+}
+
+/* === En-têtes et cellules === */
+#video-table th,
+#video-table td {
+    padding: 10px;
+    border: 1px solid #333;
+    vertical-align: middle;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* === En-têtes === */
+#video-table thead th {
+    background-color: #000;
+    color: white;
+    font-weight: bold;
+}
+
+/* === Largeurs des colonnes === */
+#video-table th:nth-child(1), #video-table td:nth-child(1) { width: 12%; }    /* Date */
+#video-table th:nth-child(2), #video-table td:nth-child(2) { width: 102px; }  /* Type */
+#video-table th:nth-child(3), #video-table td:nth-child(3) { width: 20%; }    /* Titre */
+#video-table th:nth-child(4), #video-table td:nth-child(4) { width: 120px; }  /* Miniature */
+#video-table th:nth-child(5), #video-table td:nth-child(5) { width: 8%; }     /* Durée */
+#video-table th:nth-child(6), #video-table td:nth-child(6) { width: 8%; }     /* Taille Approx. */
+#video-table th:nth-child(7), #video-table td:nth-child(7) { width: 8%; }     /* Résolution */
+#video-table th:nth-child(8), #video-table td:nth-child(8) { width: 60px; }   /* Ext */
+#video-table th:nth-child(9), #video-table td:nth-child(9) { width: 100px; }  /* Progression */
+#video-table th:nth-child(10), #video-table td:nth-child(10) { width: 60px; } /* Action */
+
+/* === Icônes dans la colonne "Type" === */
+#video-table td:nth-child(2) img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+}
+
+/* === Miniatures dans la colonne "Miniature" === */
+#video-table td:nth-child(4) img {
+    max-width: 100px;
+    max-height: 100px;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto;
+}
+
+/* === Icônes dans la colonne "Action" === */
+#video-table td:nth-child(10) img {
+    max-width: 30px;
+    max-height: 30px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+}
+
+/* === Barre de progression === */
+#video-table td:nth-child(9) progress {
+    width: 100%;
+    max-width: 100px;
+    display: inline-block;
+    vertical-align: middle;
+}
+#video-table td:nth-child(9) span {
+    margin-left: 5px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* === Conteneur de progression (si utilisé) === */
+#progress-container {
+    position: relative;
+    width: 100%;
+}
+#progress {
+    width: 100%;
+    height: 40px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #e0e0e0;
+    border-radius: 5px;
+    overflow: hidden;
+}
+#progress::-webkit-progress-bar {
+    background: #e0e0e0;
+}
+#progress::-webkit-progress-value {
+    background: #007bff;
+    transition: width 0.3s ease;
+}
+#progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+    font-size: 1.1em;
+}
+#video-table td:nth-child(9) {
+    text-align: center;
+}
+#video-table td:nth-child(9) progress {
+    width: 100%;
+    max-width: 100px;
+    height: 16px;
+    display: block;
+    margin: 0 auto 4px auto;
+}
+#video-table td:nth-child(9) span {
+    display: block;
+    font-size: 0.9em;
+    font-weight: normal;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* === Info yt-dlp & Update === */
+#yt-dlp-info {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.version-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 0.8rem;
+    margin-left: 5px;
+}
+
+.version-badge.up-to-date {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.version-badge.update-available {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+#btn-update-yt-dlp {
+    margin-left: 10px;
+    padding: 2px 10px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    background-color: #ffc107;
+    color: #212529;
+    border: 1px solid #ffc107;
+    transition: all 0.2s ease;
+}
+
+#btn-update-yt-dlp:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+}
+
+#btn-update-yt-dlp:disabled {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+
+/* Custom Context Menu */
+.context-menu {
+    position: absolute;
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    z-index: 1050;
+    border-radius: 0.25rem;
+    padding: 0.5rem 0;
+    min-width: 200px;
+    font-size: 0.9rem;
+    display: none;
+}
+
+.context-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.context-menu li {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    color: #212529;
+    transition: background-color 0.2s ease;
+}
+
+.context-menu li:hover {
+    background-color: #f8f9fa;
+    color: #e63946;
+}
+

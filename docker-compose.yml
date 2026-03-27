@@ -1,0 +1,13 @@
+services:
+  ytflask:
+    image: yt-dlp:latest
+    ports:
+      - "5011:5000"
+    volumes:
+      - /mnt/nas/video/yt-dlp:/app/data:rw
+      - ./cache:/app/cache:rw
+      - ./logs:/app/logs:rw
+    restart: unless-stopped
+    environment:
+      - FLASK_APP=main:app
+      - FLASK_RUN_HOST=0.0.0.0

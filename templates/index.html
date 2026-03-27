@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>WebVideoDownLoader</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=3">
+	<link rel="icon" type="image/png" href="{{ url_for('static', filename='images/logo.png') }}">
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header avec logo à gauche et titre à droite -->
+    <header class="header d-flex align-items-center justify-content-between p-3 bg-light border-bottom">
+        <div class="d-flex align-items-center">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo me-3" style="max-height: 50px;">
+            <h1 class="mb-0">WebVideoDownLoader</h1>
+        </div>
+        <div id="yt-dlp-info" class="text-end">
+            <!-- Les infos de version seront injectées ici par JS -->
+        </div>
+    </header>
+
+    <form id="download-form" action="/download" method="POST">
+        <div class="input-group mb-3">
+            <input type="text" id="url" name="url" class="form-control" placeholder="https://www.youtube.com/watch?v=..." required>
+            <button type="submit" class="btn btn-outline-primary">
+                <img src="{{ url_for('static', filename='images/video.png') }}" alt="Lancer Téléchargement Vidéo" style="max-width: 70px; max-height: 50px; vertical-align: middle;">
+            </button>
+            <button type="submit" form="download-form-audio" class="btn btn-outline-secondary">
+                <img src="{{ url_for('static', filename='images/sound.png') }}" alt="Lancer Téléchargement Audio" style="max-width: 70px; max-height: 50px; vertical-align: middle;">
+            </button>			
+        </div>
+    </form>
+
+    <table id="video-table" class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Date</th>
+				<th>Type</th>
+                <th>Titre</th>
+                <th>Miniature</th>
+                <th>Durée</th>
+                <th>Taille Approx.</th>
+                <th>Résolution</th>
+                <th>Ext</th>
+                <th>Progression</th>
+                <th>Action</th> 
+            </tr>
+        </thead>
+        <tbody id="video-table-body"></tbody>
+    </table>
+
+    <!-- Conteneur pour la pagination -->
+    <div id="pagination-container" class="d-flex justify-content-center align-items-center mt-3"></div>
+
+    <h2>Sortie en direct :</h2>
+    <div id="output">Prêt à télécharger...</div>
+    
+    <!-- Menu contextuel personnalisé -->
+    <div id="context-menu" class="context-menu" style="display: none;">
+        <ul>
+            <li id="menu-delete-list">Supprimer de la liste</li>
+            <li id="menu-delete-file">Supprimer (liste + fichier)</li>
+        </ul>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

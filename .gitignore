@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Logs
+logs/*.log
+*.log
+
+# Base de données (on garde la structure mais pas les données)
+data/*.sqlite
+*.db
+tasks_backup.csv
+
+# Environnement / OS
+.DS_Store
+.env
+.venv/
+
+# Fichier de marquage technique
+data/DROP
+
