@@ -9,6 +9,8 @@ logs/*.log
 # Base de données (on garde la structure mais pas les données)
 data/*.sqlite
 *.db
+*.sqlite
+app_db/
 tasks_backup.csv
 
 # Environnement / OS

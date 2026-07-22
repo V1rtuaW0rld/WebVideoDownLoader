@@ -1,13 +1,24 @@
+# ---------------------------------------------------------
+# Pour forcer la reconstruction de l'image (et télécharger
+# la toute dernière version de yt-dlp depuis GitHub) :
+# 👉 docker-compose build --no-cache
+# puis
+# 👉 docker-compose up -d
+# ---------------------------------------------------------
+
 services:
-  ytflask:
-    image: yt-dlp:latest
+  wvdl:
+    container_name: wvdl
+    build: .
+    image: wvdl:latest
     ports:
-      - "5011:5000"
+      - "5061:5000"
     volumes:
-      - /mnt/nas/video/yt-dlp:/app/data:rw
+      - /mnt/nas/video/yt-dlp:/app/downloads:rw
+      - ./app_db:/app/db:rw
       - ./cache:/app/cache:rw
       - ./logs:/app/logs:rw
     restart: unless-stopped
     environment:
-      - FLASK_APP=main:app
-      - FLASK_RUN_HOST=0.0.0.0
+      - WVDL_OUTPUT_DIR=/app/downloads
+      - WVDL_DB_PATH=/app/db/bdd.sqlite

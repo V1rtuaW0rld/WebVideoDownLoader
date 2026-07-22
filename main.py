@@ -40,7 +40,7 @@ announcer = MessageAnnouncer()
 def run_yt_dlp(url, task_id):
     print(f"Démarrage de la tâche {task_id} pour {url} (vidéo)")
     try:
-        json_cmd = f"yt-dlp --restrict-filenames --dump-json {shlex.quote(url)}"
+        json_cmd = f"yt-dlp --no-playlist --restrict-filenames --remote-components ejs:github --dump-json {shlex.quote(url)}"
         print(f"Exécution de la commande JSON : {json_cmd}")
         result = subprocess.run(shlex.split(json_cmd), capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=60)
         if result.returncode == 0 and result.stdout.strip():
@@ -152,7 +152,7 @@ def run_yt_dlp_audio(url, task_id):
     print(f"Démarrage de la tâche {task_id} pour {url} (audio)")
     # Récupération des métadatas en premier
     try:
-        json_cmd = f"yt-dlp --restrict-filenames --dump-json {shlex.quote(url)}"
+        json_cmd = f"yt-dlp --no-playlist --restrict-filenames --remote-components ejs:github --dump-json {shlex.quote(url)}"
         print(f"Exécution de la commande JSON : {json_cmd}")
         result = subprocess.run(shlex.split(json_cmd), capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=60)
         if result.returncode == 0 and result.stdout.strip():

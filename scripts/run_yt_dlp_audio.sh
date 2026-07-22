@@ -3,7 +3,7 @@
 # Chemin absolu du dossier du projet (/home/virtua/yt-dlp)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG_DIR="$SCRIPT_DIR/logs"
-OUTPUT_DIR="/mnt/nas/video/yt-dlp"
+OUTPUT_DIR="${WVDL_OUTPUT_DIR:-/mnt/nas/video/yt-dlp}"
 
 # Horodatage
 timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
@@ -55,7 +55,9 @@ fi
 echo "Exécution de la commande : $yt_dlp_bin --restrict-filenames --progress --socket-timeout 60 --retries 20 --fragment-retries 10 --concurrent-fragments 16 -f 'bestaudio' -x --audio-format mp3 -o \"$OUTPUT_DIR/%(title).${max_title_length}s.mp3\" \"$URL\" 2>&1 | tee -a \"$log_file\"" | tee -a "$log_file"
 
 "$yt_dlp_bin" \
+  --no-playlist \
   --restrict-filenames \
+  --remote-components ejs:github \
   --progress \
   --socket-timeout 60 \
   --retries 20 \

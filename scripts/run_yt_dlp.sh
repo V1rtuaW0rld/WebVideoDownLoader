@@ -3,7 +3,7 @@
 # Chemin absolu du dossier du projet (/home/virtua/yt-dlp)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG_DIR="$SCRIPT_DIR/logs"
-OUTPUT_DIR="/mnt/nas/video/yt-dlp"
+OUTPUT_DIR="${WVDL_OUTPUT_DIR:-/mnt/nas/video/yt-dlp}"
 
 # Horodatage
 timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
@@ -61,7 +61,9 @@ echo "Exécution de la commande : $yt_dlp_bin --restrict-filenames --progress --
 # --buffer-size 1M : Augmente la mémoire tampon pour les gros débits
 
 "$yt_dlp_bin" \
+  --no-playlist \
   --restrict-filenames \
+  --remote-components ejs:github \
   --progress \
   --socket-timeout 60 \
   --retries 20 \

@@ -1,10 +1,16 @@
 import sqlite3
 import time
+import os
 from datetime import datetime
 
 class Database:
-    def __init__(self, db_path="./data/bdd.sqlite"):
-        self.db_path = db_path
+    def __init__(self, db_path=None):
+        if db_path is None:
+            self.db_path = os.environ.get("WVDL_DB_PATH", "./data/bdd.sqlite")
+        else:
+            self.db_path = db_path
+            
+        os.makedirs(os.path.dirname(os.path.abspath(self.db_path)), exist_ok=True)
         self._initialize_db()
 
     def _initialize_db(self):
