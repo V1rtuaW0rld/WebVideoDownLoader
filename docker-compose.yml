@@ -12,7 +12,8 @@ services:
     build: .
     image: wvdl:latest
     ports:
-      - "5061:5000"
+      # Port hôte paramétrable via .env (WVDL_PORT). Défaut 5000 si non défini.
+      - "${WVDL_PORT:-5000}:5000"
     volumes:
       - /mnt/nas/video/yt-dlp:/app/downloads:rw
       - ./app_db:/app/db:rw

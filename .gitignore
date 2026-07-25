@@ -19,6 +19,8 @@ cookies/
 # Environnement / OS
 .DS_Store
 .env
+.env.*
+!.env.example
 .venv/
 
 # Fichier de marquage technique
