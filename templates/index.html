@@ -15,10 +15,44 @@
             <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo me-3" style="max-height: 50px;">
             <h1 class="mb-0">WebVideoDownLoader</h1>
         </div>
-        <div id="yt-dlp-info" class="text-end">
-            <!-- Les infos de version seront injectées ici par JS -->
+        <div class="d-flex align-items-center gap-3">
+            <div id="yt-dlp-info" class="text-end">
+                <!-- Les infos de version seront injectées ici par JS -->
+            </div>
+            <button type="button" id="cookies-btn" class="btn btn-outline-secondary position-relative"
+                    title="Gérer les cookies / credentials des services"
+                    data-bs-toggle="modal" data-bs-target="#cookies-modal">
+                <!-- Icône clé (SVG inline) -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M0 8a4 4 0 0 1 7.465-2H14a.5.5 0 0 1 .354.146l1.5 1.5a.5.5 0 0 1 0 .708l-1.5 1.5a.5.5 0 0 1-.708 0L13 9.207l-.646.647a.5.5 0 0 1-.708 0L11 9.207l-.646.647a.5.5 0 0 1-.708 0L9 9.207l-.646.647A.5.5 0 0 1 8 10h-.535A4 4 0 0 1 0 8m4-3a3 3 0 1 0 0 6 3 3 0 0 0 0-6"/>
+                    <path d="M4 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+                </svg>
+                <span id="cookies-badge"
+                      class="position-absolute top-0 start-100 translate-middle p-1 bg-secondary border border-light rounded-circle"
+                      style="display:none;"><span class="visually-hidden">statut cookies</span></span>
+            </button>
         </div>
     </header>
+
+    <!-- Modale de gestion des cookies / credentials par service -->
+    <div class="modal fade" id="cookies-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">🔑 Cookies &amp; credentials des services</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3">
+                        Colle ici les cookies des services qui exigent une connexion (Instagram, etc.).
+                        Le cookie est injecté automatiquement dans yt-dlp selon l'URL téléchargée.
+                        En cas d'expiration, le statut passera au rouge.
+                    </p>
+                    <div id="cookies-providers"><!-- Rempli par cookies.js --></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <form id="download-form" action="/download" method="POST">
         <div class="input-group mb-3">
@@ -66,5 +100,6 @@
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='cookies.js') }}"></script>
 </body>
 </html>

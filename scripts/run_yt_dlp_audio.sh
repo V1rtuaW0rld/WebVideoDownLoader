@@ -54,10 +54,18 @@ fi
 # Afficher la commande exacte pour déboguer
 echo "Exécution de la commande : $yt_dlp_bin --restrict-filenames --progress --socket-timeout 60 --retries 20 --fragment-retries 10 --concurrent-fragments 16 -f 'bestaudio' -x --audio-format mp3 -o \"$OUTPUT_DIR/%(title).${max_title_length}s.mp3\" \"$URL\" 2>&1 | tee -a \"$log_file\"" | tee -a "$log_file"
 
+# Injection du cookie si l'appli en a fourni un pour ce service (via l'env)
+COOKIE_ARGS=()
+if [[ -n "$WVDL_COOKIE_FILE" && -f "$WVDL_COOKIE_FILE" ]]; then
+  COOKIE_ARGS=(--cookies "$WVDL_COOKIE_FILE")
+  echo "🔑 Utilisation du cookie : $WVDL_COOKIE_FILE" | tee -a "$log_file"
+fi
+
 "$yt_dlp_bin" \
   --no-playlist \
   --restrict-filenames \
   --remote-components ejs:github \
+  "${COOKIE_ARGS[@]}" \
   --progress \
   --socket-timeout 60 \
   --retries 20 \

@@ -13,6 +13,9 @@ data/*.sqlite
 app_db/
 tasks_backup.csv
 
+# Cookies / credentials des services (secrets)
+cookies/
+
 # Environnement / OS
 .DS_Store
 .env

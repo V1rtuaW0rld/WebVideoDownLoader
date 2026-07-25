@@ -8,6 +8,7 @@ import re
 import uuid
 import json
 from bdd import db
+import cookies_manager
 import time
 import sqlite3
 import urllib.request
@@ -37,10 +38,51 @@ class MessageAnnouncer:
 
 announcer = MessageAnnouncer()
 
+# Motifs d'erreur yt-dlp signalant un cookie manquant/expiré (auth requise)
+_AUTH_ERROR_RE = re.compile(
+    r"(need to log in|login required|requires? (?:a )?login|sign in to|"
+    r"use --cookies|only available (?:to|for) (?:registered|logged)|"
+    r"this (?:video|content|post) is private|rate.?limit reach)",
+    re.IGNORECASE,
+)
+
+
+def build_json_cmd(url):
+    """Construit la commande --dump-json en injectant les cookies si l'URL en nécessite."""
+    cookie_file = cookies_manager.cookie_file_for_url(url)
+    cookie_opt = f"--cookies {shlex.quote(cookie_file)} " if cookie_file else ""
+    return (
+        f"yt-dlp --no-playlist --restrict-filenames --remote-components ejs:github "
+        f"{cookie_opt}--dump-json {shlex.quote(url)}"
+    )
+
+
+def build_script_env(url):
+    """Env pour les scripts de téléchargement : transmet le fichier cookie éventuel."""
+    env = os.environ.copy()
+    cookie_file = cookies_manager.cookie_file_for_url(url)
+    if cookie_file:
+        env["WVDL_COOKIE_FILE"] = cookie_file
+    else:
+        env.pop("WVDL_COOKIE_FILE", None)
+    return env
+
+
+def handle_extraction_error(url, task_id, stderr):
+    """Annonce l'erreur d'extraction, avec un message dédié si auth/cookie requis."""
+    if _AUTH_ERROR_RE.search(stderr or ""):
+        cookies_manager.mark_status_for_url(url, expired=True)
+        announcer.announce(
+            f"[{task_id}] 🔑 Cookie requis ou expiré pour ce service. "
+            f"Ouvre la modale « clé » (en haut à droite) pour (re)coller un cookie valide."
+        )
+    announcer.announce(f"[{task_id}] ❌ Erreur ou JSON vide : {stderr}")
+
+
 def run_yt_dlp(url, task_id):
     print(f"Démarrage de la tâche {task_id} pour {url} (vidéo)")
     try:
-        json_cmd = f"yt-dlp --no-playlist --restrict-filenames --remote-components ejs:github --dump-json {shlex.quote(url)}"
+        json_cmd = build_json_cmd(url)
         print(f"Exécution de la commande JSON : {json_cmd}")
         result = subprocess.run(shlex.split(json_cmd), capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=60)
         if result.returncode == 0 and result.stdout.strip():
@@ -63,6 +105,7 @@ def run_yt_dlp(url, task_id):
                 else:
                     filesize_approx = 'N/A'
 
+                cookies_manager.mark_status_for_url(url, expired=False)
                 db.add_task(task_id, title, thumbnail, duration_string, filesize_approx, resolution, filename, url, 'video')
                 task = db.get_task_by_id(task_id)
                 announcer.announce(f"[{task_id}] VideoInfo: {json.dumps({'task_id': task_id, 'date': task[0], 'title': title, 'thumbnail': thumbnail, 'duration_string': duration_string, 'filesize_approx': filesize_approx, 'resolution': resolution, 'filename': filename, 'progress': 0, 'status': task[10], 'type': 'video'})}")
@@ -70,7 +113,7 @@ def run_yt_dlp(url, task_id):
                 announcer.announce(f"[{task_id}] ❌ Erreur lors du parsing JSON : {str(e)}")
                 return
         else:
-            announcer.announce(f"[{task_id}] ❌ Erreur ou JSON vide : {result.stderr}")
+            handle_extraction_error(url, task_id, result.stderr)
             return
     except subprocess.TimeoutExpired as e:
         announcer.announce(f"[{task_id}] ❌ Timeout lors de la récupération des informations")
@@ -91,7 +134,8 @@ def run_yt_dlp(url, task_id):
             stderr=subprocess.STDOUT,
             text=True,
             encoding='utf-8',
-            errors='replace'
+            errors='replace',
+            env=build_script_env(url)
         )
         active_processes[task_id] = process
         progress_re = re.compile(r'\[download\]\s+(\d+\.\d+)%')
@@ -152,7 +196,7 @@ def run_yt_dlp_audio(url, task_id):
     print(f"Démarrage de la tâche {task_id} pour {url} (audio)")
     # Récupération des métadatas en premier
     try:
-        json_cmd = f"yt-dlp --no-playlist --restrict-filenames --remote-components ejs:github --dump-json {shlex.quote(url)}"
+        json_cmd = build_json_cmd(url)
         print(f"Exécution de la commande JSON : {json_cmd}")
         result = subprocess.run(shlex.split(json_cmd), capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=60)
         if result.returncode == 0 and result.stdout.strip():
@@ -176,6 +220,7 @@ def run_yt_dlp_audio(url, task_id):
                     filesize_approx = 'N/A'
 
                 # Stocker les métadatas dans la BDD, même sans téléchargement
+                cookies_manager.mark_status_for_url(url, expired=False)
                 db.add_task(task_id, title, thumbnail, duration_string, filesize_approx, resolution, filename, url, 'audio')
                 task = db.get_task_by_id(task_id)
                 announcer.announce(f"[{task_id}] VideoInfo: {json.dumps({'task_id': task_id, 'date': task[0], 'title': title, 'thumbnail': thumbnail, 'duration_string': duration_string, 'filesize_approx': filesize_approx, 'resolution': resolution, 'filename': filename, 'progress': 0, 'status': task[10], 'type': 'audio'})}")
@@ -183,7 +228,7 @@ def run_yt_dlp_audio(url, task_id):
                 announcer.announce(f"[{task_id}] ❌ Erreur lors du parsing JSON : {str(e)}")
                 return
         else:
-            announcer.announce(f"[{task_id}] ❌ Erreur ou JSON vide : {result.stderr}")
+            handle_extraction_error(url, task_id, result.stderr)
             return
     except subprocess.TimeoutExpired as e:
         announcer.announce(f"[{task_id}] ❌ Timeout lors de la récupération des informations")
@@ -205,7 +250,8 @@ def run_yt_dlp_audio(url, task_id):
             stderr=subprocess.STDOUT,
             text=True,
             encoding='utf-8',
-            errors='replace'
+            errors='replace',
+            env=build_script_env(url)
         )
         active_processes[task_id] = process
         progress_re = re.compile(r'\[download\]\s+(\d+\.\d+)%')
@@ -337,6 +383,21 @@ def yt_dlp_update():
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/api/cookies', methods=['GET'])
+def cookies_list():
+    return json.dumps(cookies_manager.list_status()), 200, {'Content-Type': 'application/json'}
+
+@app.route('/api/cookies/<provider_id>', methods=['POST'])
+def cookies_save(provider_id):
+    content = request.form.get('content', '')
+    ok, msg = cookies_manager.save_credential(provider_id, content)
+    return msg, (200 if ok else 400)
+
+@app.route('/api/cookies/<provider_id>', methods=['DELETE'])
+def cookies_delete(provider_id):
+    ok, msg = cookies_manager.delete_credential(provider_id)
+    return msg, (200 if ok else 400)
 
 @app.route('/download', methods=['POST'])
 def download():

@@ -60,10 +60,18 @@ echo "Exécution de la commande : $yt_dlp_bin --restrict-filenames --progress --
 # --file-access-provider builtin : Accélère l'écriture sur certains systèmes
 # --buffer-size 1M : Augmente la mémoire tampon pour les gros débits
 
+# Injection du cookie si l'appli en a fourni un pour ce service (via l'env)
+COOKIE_ARGS=()
+if [[ -n "$WVDL_COOKIE_FILE" && -f "$WVDL_COOKIE_FILE" ]]; then
+  COOKIE_ARGS=(--cookies "$WVDL_COOKIE_FILE")
+  echo "🔑 Utilisation du cookie : $WVDL_COOKIE_FILE" | tee -a "$log_file"
+fi
+
 "$yt_dlp_bin" \
   --no-playlist \
   --restrict-filenames \
   --remote-components ejs:github \
+  "${COOKIE_ARGS[@]}" \
   --progress \
   --socket-timeout 60 \
   --retries 20 \

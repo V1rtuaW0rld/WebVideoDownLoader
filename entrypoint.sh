@@ -4,7 +4,7 @@ set -e
 echo "[SYSTEM] Démarrage du conteneur WVDL..."
 
 # 1. Création des dossiers cibles s'ils n'existent pas encore
-mkdir -p /app/db /app/cache /app/logs
+mkdir -p /app/db /app/cache /app/logs /app/cookies
 
 # 2. Correction des permissions globale sur l'application (le conteneur démarre en 'root' spécialement pour faire ça)
 echo "[SYSTEM] Ajustement des permissions pour ytuser (UID 1000)..."

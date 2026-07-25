@@ -2,6 +2,9 @@ __pycache__/
 *.pyc
 logs/
 cache/
+cookies/
+app_db/
+data/
 Dockerfile
 docker-compose.yml
 
