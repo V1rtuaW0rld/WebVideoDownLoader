@@ -39,6 +39,9 @@
 
 ---
 
+<img width="1909" height="1059" alt="image" src="https://github.com/user-attachments/assets/067078ad-5b19-4f80-9e86-045110d58e4d" />
+
+
 ## 🚀 Démarrage Rapide avec Docker Compose
 
 ### 1. Configuration (`.env`)
