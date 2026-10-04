@@ -67,12 +67,25 @@ if [[ -n "$WVDL_COOKIE_FILE" && -f "$WVDL_COOKIE_FILE" ]]; then
   echo "🔑 Utilisation du cookie : $WVDL_COOKIE_FILE" | tee -a "$log_file"
 fi
 
+# Injection des headers navigateur (User-Agent, Referer, Origin)
+HEADER_ARGS=()
+if [[ -n "$WVDL_USER_AGENT" ]]; then
+  HEADER_ARGS+=(--user-agent "$WVDL_USER_AGENT")
+fi
+if [[ -n "$WVDL_REFERER" ]]; then
+  HEADER_ARGS+=(--add-header "Referer: $WVDL_REFERER")
+fi
+if [[ -n "$WVDL_ORIGIN" ]]; then
+  HEADER_ARGS+=(--add-header "Origin: $WVDL_ORIGIN")
+fi
+
 "$yt_dlp_bin" \
   --no-playlist \
   --restrict-filenames \
   --no-check-certificates \
   --remote-components ejs:github \
   "${COOKIE_ARGS[@]}" \
+  "${HEADER_ARGS[@]}" \
   --progress \
   --socket-timeout 60 \
   --retries 20 \

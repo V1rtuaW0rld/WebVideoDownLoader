@@ -47,24 +47,68 @@ _AUTH_ERROR_RE = re.compile(
 )
 
 
+def get_stream_headers(url):
+    """Dérive un User-Agent navigateur et des headers Referer/Origin appropriés pour contourner les blocages 403."""
+    user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+    origin = ""
+    referer = ""
+    try:
+        parsed = urlparse(url)
+        hostname = (parsed.hostname or "").lower()
+        parts = hostname.split('.')
+        if len(parts) >= 2:
+            if len(parts) >= 3 and parts[-2] in ('co', 'com', 'org', 'net', 'edu', 'gov'):
+                root_domain = '.'.join(parts[-3:])
+            else:
+                root_domain = '.'.join(parts[-2:])
+        else:
+            root_domain = hostname
+        
+        scheme = parsed.scheme or "https"
+        if root_domain:
+            origin = f"{scheme}://{root_domain}"
+            referer = f"{scheme}://{root_domain}/"
+    except Exception:
+        pass
+    return user_agent, referer, origin
+
+
 def build_json_cmd(url):
-    """Construit la commande --dump-json en injectant les cookies si l'URL en nécessite."""
+    """Construit la commande --dump-json en injectant les cookies et en-têtes navigateur."""
     cookie_file = cookies_manager.cookie_file_for_url(url)
     cookie_opt = f"--cookies {shlex.quote(cookie_file)} " if cookie_file else ""
+    user_agent, referer, origin = get_stream_headers(url)
+    headers_opt = f"--user-agent {shlex.quote(user_agent)} "
+    if referer:
+        headers_opt += f"--add-header {shlex.quote(f'Referer: {referer}')} "
+    if origin:
+        headers_opt += f"--add-header {shlex.quote(f'Origin: {origin}')} "
+
     return (
         f"yt-dlp --no-playlist --restrict-filenames --no-check-certificates --remote-components ejs:github "
-        f"{cookie_opt}--dump-json {shlex.quote(url)}"
+        f"{headers_opt}{cookie_opt}--dump-json {shlex.quote(url)}"
     )
 
 
 def build_script_env(url):
-    """Env pour les scripts de téléchargement : transmet le fichier cookie éventuel."""
+    """Env pour les scripts de téléchargement : transmet le fichier cookie éventuel et les headers HTTP."""
     env = os.environ.copy()
     cookie_file = cookies_manager.cookie_file_for_url(url)
     if cookie_file:
         env["WVDL_COOKIE_FILE"] = cookie_file
     else:
         env.pop("WVDL_COOKIE_FILE", None)
+
+    user_agent, referer, origin = get_stream_headers(url)
+    env["WVDL_USER_AGENT"] = user_agent
+    if referer:
+        env["WVDL_REFERER"] = referer
+    else:
+        env.pop("WVDL_REFERER", None)
+    if origin:
+        env["WVDL_ORIGIN"] = origin
+    else:
+        env.pop("WVDL_ORIGIN", None)
     return env
 
 
