@@ -67,7 +67,7 @@ if [[ -n "$WVDL_USER_AGENT" ]]; then
   HEADER_ARGS+=(--user-agent "$WVDL_USER_AGENT")
 fi
 if [[ -n "$WVDL_REFERER" ]]; then
-  HEADER_ARGS+=(--add-header "Referer: $WVDL_REFERER")
+  HEADER_ARGS+=(--referer "$WVDL_REFERER" --add-header "Referer: $WVDL_REFERER")
 fi
 if [[ -n "$WVDL_ORIGIN" ]]; then
   HEADER_ARGS+=(--add-header "Origin: $WVDL_ORIGIN")

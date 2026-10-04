@@ -73,21 +73,31 @@ def get_stream_headers(url):
     return user_agent, referer, origin
 
 
-def build_json_cmd(url):
-    """Construit la commande --dump-json en injectant les cookies et en-têtes navigateur."""
-    cookie_file = cookies_manager.cookie_file_for_url(url)
-    cookie_opt = f"--cookies {shlex.quote(cookie_file)} " if cookie_file else ""
+def build_json_cmd_args(url):
+    """Construit la liste des arguments yt-dlp pour extraire les métadonnées JSON."""
     user_agent, referer, origin = get_stream_headers(url)
-    headers_opt = f"--user-agent {shlex.quote(user_agent)} "
+    cookie_file = cookies_manager.cookie_file_for_url(url)
+    args = [
+        "yt-dlp",
+        "--no-playlist",
+        "--restrict-filenames",
+        "--no-check-certificates",
+        "--remote-components", "ejs:github",
+        "--user-agent", user_agent,
+    ]
     if referer:
-        headers_opt += f"--add-header {shlex.quote(f'Referer: {referer}')} "
+        args.extend(["--referer", referer, "--add-header", f"Referer:{referer}"])
     if origin:
-        headers_opt += f"--add-header {shlex.quote(f'Origin: {origin}')} "
+        args.extend(["--add-header", f"Origin:{origin}"])
+    if cookie_file:
+        args.extend(["--cookies", cookie_file])
+    args.extend(["--dump-json", url])
+    return args
 
-    return (
-        f"yt-dlp --no-playlist --restrict-filenames --no-check-certificates --remote-components ejs:github "
-        f"{headers_opt}{cookie_opt}--dump-json {shlex.quote(url)}"
-    )
+
+def build_json_cmd(url):
+    """Construit la commande --dump-json sous forme de chaîne pour affichage/log."""
+    return " ".join(shlex.quote(a) for a in build_json_cmd_args(url))
 
 
 def build_script_env(url):
@@ -126,9 +136,9 @@ def handle_extraction_error(url, task_id, stderr):
 def run_yt_dlp(url, task_id):
     print(f"Démarrage de la tâche {task_id} pour {url} (vidéo)")
     try:
-        json_cmd = build_json_cmd(url)
-        print(f"Exécution de la commande JSON : {json_cmd}")
-        result = subprocess.run(shlex.split(json_cmd), capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=60)
+        cmd_args = build_json_cmd_args(url)
+        print(f"Exécution de la commande JSON : {shlex.join(cmd_args)}")
+        result = subprocess.run(cmd_args, capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=60)
         if result.returncode == 0 and result.stdout.strip():
             try:
                 video_info = json.loads(result.stdout.strip())
@@ -240,9 +250,9 @@ def run_yt_dlp_audio(url, task_id):
     print(f"Démarrage de la tâche {task_id} pour {url} (audio)")
     # Récupération des métadatas en premier
     try:
-        json_cmd = build_json_cmd(url)
-        print(f"Exécution de la commande JSON : {json_cmd}")
-        result = subprocess.run(shlex.split(json_cmd), capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=60)
+        cmd_args = build_json_cmd_args(url)
+        print(f"Exécution de la commande JSON : {shlex.join(cmd_args)}")
+        result = subprocess.run(cmd_args, capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=60)
         if result.returncode == 0 and result.stdout.strip():
             try:
                 video_info = json.loads(result.stdout.strip())
