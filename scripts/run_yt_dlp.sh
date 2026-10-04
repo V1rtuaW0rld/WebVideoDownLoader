@@ -70,6 +70,7 @@ fi
 "$yt_dlp_bin" \
   --no-playlist \
   --restrict-filenames \
+  --no-check-certificates \
   --remote-components ejs:github \
   "${COOKIE_ARGS[@]}" \
   --progress \

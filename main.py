@@ -52,7 +52,7 @@ def build_json_cmd(url):
     cookie_file = cookies_manager.cookie_file_for_url(url)
     cookie_opt = f"--cookies {shlex.quote(cookie_file)} " if cookie_file else ""
     return (
-        f"yt-dlp --no-playlist --restrict-filenames --remote-components ejs:github "
+        f"yt-dlp --no-playlist --restrict-filenames --no-check-certificates --remote-components ejs:github "
         f"{cookie_opt}--dump-json {shlex.quote(url)}"
     )
 
